@@ -1,6 +1,7 @@
 package com.lucifer.togglepvp.plugin;
 
-import com.lucifer.togglepvp.plugin.Commands.PvPCommand;
+import com.lucifer.togglepvp.plugin.Commands.PvP;
+import com.lucifer.togglepvp.plugin.Commands.Toggle;
 import com.lucifer.togglepvp.plugin.Data.Data;
 import com.lucifer.togglepvp.plugin.Listeners.*;
 import org.bukkit.Bukkit;
@@ -21,8 +22,9 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
 
-        getCommand("pvp").setExecutor(new PvPCommand());
-        getCommand("pvp").setTabCompleter(new PvPCommand());
+        getCommand("pvp").setExecutor(new PvP());
+        getCommand("pvp").setTabCompleter(new PvP());
+        getCommand("togglepvp").setExecutor(new Toggle());
 
         this.data = new Data(this);
         if (!getDataFolder().exists()) {
