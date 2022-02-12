@@ -1,0 +1,42 @@
+# Forces Players to use Old PvP in that world
+Force-Old:
+  - 'world1'
+  - 'world2'
+
+# Force Players to use New PvP in that world
+Force-New:
+  - 'exampleWorld'
+  - 'world1'
+
+# Disable turning off PvP
+Disabled-Worlds:
+  - 'world1'
+  - 'world2'
+
+Forced-Old: "&fPvP is forced to &a1.8 in this World"
+Forced-New: "&fPvP is forced to &a1.18 in this World"
+Force-Disable: "&fPvP is on in this World"
+
+Prefix: "&9[PvP]&7: "
+NoPermissionMessage: "&cThis command doesn't exist.. or does it?"
+
+# On PvP Messages
+You-Disabled: "&cYou cannot attack while your PvP is off"
+Them-Disabled: "&f[playerName] Has PvP &cDisabled"
+Both-Disabled: "&fYou and [playerName] &fHave PvP &cDisabled"
+Different-PvPMode: "&f[playerName] Doesn't Share the same PvP Mode"
+
+# On Command Messages
+PvPOn: "&fYour PvP has been turned &a&lON"
+PvPOff: "&fYour PvP has been turn &c&lOFF"
+ModeOld: "&fYour PvP is now set to &a1.8"
+AlreadyOld: "&cYou combat is already set to 1.8"
+ModeNew: "&fYour PvP is now set to &a1.18"
+AlreadyNew: "&cYou combat is already set to 1.18"
+DefaultOld: "&fYour default PvP is now set to &a1.8"
+AlreadyDefaultOld: "&cYour default PvP is Already set to 1.8"
+DefaultNew: "&fYour default PvP is now set to &a1.18"
+AlreadyDefaultNew: "&cYour default PvP is Already set to 1.18"
+SpecifyMode: "&cYou need to specify the Combat Mode!"
+
+ReloadMessage: "&aTogglePvP has been Reloaded!"
