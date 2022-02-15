@@ -32,39 +32,46 @@ public class Pvp implements Listener {
             attacker = (Player) damagesource;
         } else if (damagesource instanceof Arrow) {
             Arrow arrow = (Arrow) damagesource;
-            if (arrow.getShooter() instanceof Player) {
-                attacker = (Player)arrow.getShooter();
+            if (!(arrow.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player)arrow.getShooter();
         } else if(damagesource instanceof ThrownPotion) {
             ThrownPotion potion = (ThrownPotion)damagesource;
-            if(potion.getShooter() instanceof Player) {
-                attacker = (Player) potion.getShooter();
+            if(!(potion.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) potion.getShooter();
         } else if(damagesource instanceof Egg) {
             Egg egg = (Egg) damagesource;
-            if(egg.getShooter() instanceof Player) {
-                attacker = (Player) egg.getShooter();
+            if(!(egg.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) egg.getShooter();
         } else if(damagesource instanceof Snowball) {
             Snowball ball = (Snowball) damagesource;
-            if(ball.getShooter() instanceof Player) {
-                attacker = (Player) ball.getShooter();
+            if(!(ball.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) ball.getShooter();
         } else if(damagesource instanceof FishHook) {
             FishHook hook = (FishHook) damagesource;
-            if(hook.getShooter() instanceof Player) {
-                attacker = (Player) hook.getShooter();
+            if(!(hook.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) hook.getShooter();
         } else if(damagesource instanceof EnderPearl) {
             EnderPearl pearl = (EnderPearl) damagesource;
-            if(pearl.getShooter() instanceof Player) {
-                attacker = (Player) pearl.getShooter();
+            if(!(pearl.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) pearl.getShooter();
         } else if(damagesource instanceof Trident){
             Trident trident = (Trident) damagesource;
-            if(trident.getShooter() instanceof Player) {
-                attacker = (Player) trident.getShooter();
+            if(!(trident.getShooter() instanceof Player)) {
+                return;
             }
+            attacker = (Player) trident.getShooter();
         } else {
             return;
         }
