@@ -34,6 +34,7 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Pvp(),this);
         Bukkit.getPluginManager().registerEvents(new Respawn(),this);
         Bukkit.getPluginManager().registerEvents(new WorldChange(),this);
+        Bukkit.getPluginManager().registerEvents(new PetAttackListener(),this);
 
         getConfig().options().copyDefaults();
         saveDefaultConfig();

@@ -26,6 +26,10 @@ Them-Disabled: "&f[playerName] Has PvP &cDisabled"
 Both-Disabled: "&fYou and [playerName] &fHave PvP &cDisabled"
 Different-PvPMode: "&f[playerName] Doesn't Share the same PvP Mode"
 
+You-Disabled-Pets: "&cYou cant attack someone else pet while your PvP is off"
+Owner-Disabled-Pets: "&fYou cant attack [playerName]'s pet as they have PvP off"
+Pet-Different-Mode: "&fThis pets owner is in a different gamemode!"
+
 # On Command Messages
 PvPOn: "&fYour PvP has been turned &a&lON"
 PvPOff: "&fYour PvP has been turn &c&lOFF"
