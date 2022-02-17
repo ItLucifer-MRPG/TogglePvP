@@ -18,12 +18,10 @@ public class Toggle implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         this.data = new Data(main);
-        Object[] forceold = main.getConfig().getStringList("Force-Old").toArray();
-        Object[] forcenew = main.getConfig().getStringList("Force-New").toArray();
         if (!(sender instanceof Player player)) {
             return true;
         }
-        if (!cmd.getName().equalsIgnoreCase("PvP")) {
+        if (!cmd.getName().equalsIgnoreCase("togglepvp")) {
             return true;
         }
         if (args.length == 0) {
