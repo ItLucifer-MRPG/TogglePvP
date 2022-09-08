@@ -5,6 +5,7 @@ import com.lucifer.togglepvp.plugin.Commands.Toggle;
 import com.lucifer.togglepvp.plugin.Data.Data;
 import com.lucifer.togglepvp.plugin.Listeners.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,11 +13,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 
 
-public class Main extends JavaPlugin implements Listener {
+public class Main extends JavaPlugin {
 
     public ArrayList<Player> enabled = new ArrayList<>();
     public ArrayList<Player> oldCombat = new ArrayList<>();
-
     private Data data;
 
     @Override
@@ -30,11 +30,8 @@ public class Main extends JavaPlugin implements Listener {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdirs();
         }
-        Bukkit.getPluginManager().registerEvents(new Join(), this);
-        Bukkit.getPluginManager().registerEvents(new Pvp(),this);
-        Bukkit.getPluginManager().registerEvents(new Respawn(),this);
-        Bukkit.getPluginManager().registerEvents(new WorldChange(),this);
-        Bukkit.getPluginManager().registerEvents(new PetAttackListener(),this);
+
+        registerEvents((Listener) new Listeners(this));
 
         getConfig().options().copyDefaults();
         saveDefaultConfig();
@@ -44,5 +41,22 @@ public class Main extends JavaPlugin implements Listener {
         super.onDisable();
         data.save();
     }
+
+    public void registerEvents(Listener l){
+        Bukkit.getServer().getPluginManager().registerEvents(l,this);
+    }
+
+    public ArrayList<Player> getEnabled(){
+        return this.enabled;
+    }
+    public ArrayList<Player> getOldCombat(){
+        return this.oldCombat;
+    }
+
+    public static String useColors(String args) {
+        return ChatColor.translateAlternateColorCodes('&',args);
+    }
+
+
 }
 
