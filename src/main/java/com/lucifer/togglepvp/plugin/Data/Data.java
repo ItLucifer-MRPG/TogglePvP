@@ -1,30 +1,36 @@
 package com.lucifer.togglepvp.plugin.Data;
 
-import com.lucifer.togglepvp.plugin.Main;
+import com.lucifer.togglepvp.plugin.TogglePVP;
 import org.bukkit.entity.Player;
+
+import java.io.IOException;
+import java.util.UUID;
 
 public class Data extends DataMain {
 
-    public Data(Main main) {
-        super(main, "data.yml");
+    private String fileName;
+    public Data(TogglePVP togglePVP,String s) {
+        super(togglePVP, s);
+        this.fileName = s;
     }
-    public void onNewPlayer(Player player) {
-        if (config.contains(player.getUniqueId().toString())) {
-            return;
-        }
-        config.set(player.getUniqueId().toString(),"new");
+    public void setNewPlayerData(UUID player) {
+        config.set(player.toString(),"new");
+        this.save();
     }
-    public String checkMode(Player player){
-        if (config.getString(player.getUniqueId().toString()).equals("new")) {
+    public String checkMode(UUID player){
+        if (config.getString(player.toString()).equals("new")) {
             return "new";
         } else {
             return "old";
         }
     }
-    public void setDefaultOld(Player player) {
-        config.set(player.getUniqueId().toString(),"old");
+    public boolean isRegistered(UUID id) {
+        return config.contains(id.toString());
     }
-    public void setDefaultNew(Player player) {
-        config.set(player.getUniqueId().toString(),"new");
+    public void setModeOld(UUID player) {
+        config.set(player.toString(),"old");
+    }
+    public void setModeNew(UUID player) {
+        config.set(player.toString(),"new");
     }
 }

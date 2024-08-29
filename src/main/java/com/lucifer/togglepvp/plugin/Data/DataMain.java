@@ -1,21 +1,21 @@
 package com.lucifer.togglepvp.plugin.Data;
 
-import com.lucifer.togglepvp.plugin.Main;
-import org.bukkit.configuration.file.FileConfiguration;
+import com.lucifer.togglepvp.plugin.TogglePVP;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 
 public class DataMain {
 
-    protected Main main;
-    private File file;
-    protected FileConfiguration config;
+    protected TogglePVP togglePVP;
+    private final File file;
+    protected @NotNull YamlConfiguration config;
 
-    public DataMain(Main main, String fileName) {
-        this.main = main;
-        this.file = new File(main.getDataFolder(), fileName);
+    public DataMain(TogglePVP togglePVP, String fileName) {
+        this.togglePVP = togglePVP;
+        this.file = new File(togglePVP.getDataFolder(), fileName);
         if (!file.exists()) {
             try {
                 file.createNewFile();

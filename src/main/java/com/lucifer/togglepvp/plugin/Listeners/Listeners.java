@@ -1,72 +1,60 @@
 package com.lucifer.togglepvp.plugin.Listeners;
 
-import com.lucifer.togglepvp.plugin.Data.Data;
-import com.lucifer.togglepvp.plugin.Main;
+import com.lucifer.togglepvp.plugin.PlayerManager;
+import com.lucifer.togglepvp.plugin.TogglePVP;
+import com.lucifer.togglepvp.plugin.Util.Util;
+import com.lucifer.togglepvp.plugin.WorldManager;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class Listeners {
 
-    private Main main;
-    private Data data;
-    public String prefix = main.getConfig().getString("Prefix");
+public class Listeners implements Listener {
 
-    public Listeners(Main main) {
-        this.main = main;
+    private PlayerManager playerManager;
+    private YamlConfiguration config;
+    private WorldManager worldManager;
+    public String prefix;
+
+    public Listeners(TogglePVP plugin) {
+        this.playerManager = plugin.getPlayerManager();
+        this.config = plugin.getMyConfig();
+        this.worldManager = plugin.getWorldManager();
+        this.prefix = config.getString("Prefix");
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        this.data = new Data(main);
         Player p = event.getPlayer();
         double attackSpeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getValue();
 
-        data.onNewPlayer(p);
-        data.save();
+        if (worldManager.forceOldWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-Old")));
+            Util.setOldCombat(p);
+            return;
+        }
 
-        Object[] forceold = main.getConfig().getStringList("Force-Old").toArray();
-        for (Object value : forceold) {
-            if (value.equals(p.getWorld().getName())) {
-                p.sendMessage(Main.useColors(main.getConfig().getString("Forced-Old")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
-                return;
-            }
+        if (worldManager.forceNewWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-New")));
+            Util.setNewCombat(p);
+            return;
         }
-        Object[] forcenew = main.getConfig().getStringList("Force-New").toArray();
-        for (Object o : forcenew) {
-            if (o.equals(p.getWorld().getName())) {
-                p.sendMessage(Main.useColors(main.getConfig().getString("Forced-New")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4);
-                return;
-            }
-        }
-        if (data.checkMode(p).equals("old")) {
-            main.oldCombat.add(p);
-        }
-        if (main.oldCombat.contains(p)) {
+        if (playerManager.isOldCombat(p.getUniqueId())) {
             p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
             return;
         }
-        if (!main.oldCombat.contains(p) && attackSpeed != p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getDefaultValue()) {
+        if (!playerManager.isOldCombat(p.getUniqueId()) && attackSpeed != p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getDefaultValue()) {
             double defaultspeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getDefaultValue();
             p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(defaultspeed);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent event){
-        Player p = event.getPlayer();
-        if (main.oldCombat.contains(p)) {
-            main.oldCombat.remove(p);
-            return;
         }
     }
 
@@ -75,89 +63,44 @@ public class Listeners {
 
         Entity target = event.getEntity();
         Entity damagesource = event.getDamager();
-        Player attacker = null;
+        Player attacker = Util.isPlayer(event);
 
-        if (!(target instanceof Player)) {
+        if (attacker == null) {
             return;
         }
-        if (damagesource instanceof Player) {
-            attacker = (Player) damagesource;
-        } else if (damagesource instanceof Arrow) {
-            Arrow arrow = (Arrow) damagesource;
-            if (!(arrow.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player)arrow.getShooter();
-        } else if(damagesource instanceof ThrownPotion) {
-            ThrownPotion potion = (ThrownPotion)damagesource;
-            if(!(potion.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) potion.getShooter();
-        } else if(damagesource instanceof Egg) {
-            Egg egg = (Egg) damagesource;
-            if(!(egg.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) egg.getShooter();
-        } else if(damagesource instanceof Snowball) {
-            Snowball ball = (Snowball) damagesource;
-            if(!(ball.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) ball.getShooter();
-        } else if(damagesource instanceof FishHook) {
-            FishHook hook = (FishHook) damagesource;
-            if(!(hook.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) hook.getShooter();
-        } else if(damagesource instanceof EnderPearl) {
-            EnderPearl pearl = (EnderPearl) damagesource;
-            if(!(pearl.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) pearl.getShooter();
-        } else if(damagesource instanceof Trident){
-            Trident trident = (Trident) damagesource;
-            if(!(trident.getShooter() instanceof Player)) {
-                return;
-            }
-            attacker = (Player) trident.getShooter();
-        } else {
+        if (worldManager.worldDisabled(attacker.getWorld())) {
             return;
         }
-        Object[] disable = main.getConfig().getStringList("Disabled-Worlds").toArray();
-        for (Object value : disable) {
-            if (value.equals(attacker.getWorld().getName())) {
-                return;
-            }
-        }
-        if (main.enabled.contains(target) && main.enabled.contains(attacker) && main.oldCombat.contains(target) && main.oldCombat.contains(attacker)) {
+        if (playerManager.bothEnabled(target.getUniqueId(),attacker.getUniqueId()) &&  playerManager.bothSameCombat(target.getUniqueId(),attacker.getUniqueId())) {
             return;
-        } else if (!main.enabled.contains(target) && main.enabled.contains(attacker)) {
+        }
+        if (!playerManager.isEnabled(target.getUniqueId()) && !playerManager.isEnabled(attacker.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(Main.useColors(prefix+main.getConfig().getString("Them-Disabled").replace("[playerName]", target.getName())));
-        } else if (!main.enabled.contains(target) && !main.enabled.contains(attacker)) {
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("Both-Disabled").replace("[playerName]", target.getName())));
+            return;
+        }
+        if (playerManager.isEnabled(attacker.getUniqueId()) && !playerManager.isEnabled(target.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Both-Disabled").replace("[playerName]", target.getName())));
-        } else if (!main.enabled.contains(attacker) && main.enabled.contains(target)) {
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("Them-Disabled").replace("[playerName]", target.getName())));
+            return;
+        }
+        if (!playerManager.isEnabled(attacker.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("You-Disabled")));
-        } else if (main.oldCombat.contains(attacker) && !main.oldCombat.contains(target)) {
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("You-Disabled")));
+            return;
+        }
+        if (!playerManager.bothSameCombat(attacker.getUniqueId(),target.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Different-PvPMode").replace("[playerName]", target.getName())));
-        } else if (!main.oldCombat.contains(attacker) && main.oldCombat.contains(target)) {
-            event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Different-PvPMode").replace("[playerName]", target.getName())));
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("Different-PvPMode").replace("[playerName]", target.getName())));
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPetPvP(EntityDamageByEntityEvent event) {
-        Player attacker = null;
+
         Entity target = event.getEntity();
         Entity damagesource = event.getDamager();
+        Player attacker = Util.isPlayer(event);
 
         if (!(target instanceof Tameable)) {
             return;
@@ -214,84 +157,55 @@ public class Listeners {
         } else {
             return;
         }
-        Object[] disable = main.getConfig().getStringList("Disabled-Worlds").toArray();
-        for (Object value : disable) {
-            if (value.equals(attacker.getWorld().getName())) {
-                return;
-            }
-        }
-        if (main.enabled.contains(owner) && main.enabled.contains(attacker) && main.oldCombat.contains(owner) && main.oldCombat.contains(attacker)) {
+        if (worldManager.worldDisabled(attacker.getWorld())) {
             return;
-        } else if (!main.enabled.contains(owner) && main.enabled.contains(attacker)) {
+        }
+        if (playerManager.bothEnabled(owner.getUniqueId(),attacker.getUniqueId()) && playerManager.bothSameCombat(owner.getUniqueId(),attacker.getUniqueId())) {
+            return;
+        }
+        if (!playerManager.isEnabled(attacker.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Owner-Disabled-Pets").replace("[playerName]", tamed.getOwner().getName())));
-        } else if (!main.enabled.contains(owner) && !main.enabled.contains(attacker)) {
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("You-Disabled-Pets").replace("[playerName]", tamed.getOwner().getName())));
+            return;
+        }
+        if (!playerManager.isEnabled(owner.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("You-Disabled-Pets").replace("[playerName]", tamed.getOwner().getName())));
-        } else if (!main.oldCombat.contains(owner) && main.oldCombat.contains(attacker)) {
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("Owner-Disabled-Pets").replace("[playerName]", tamed.getOwner().getName())));
+            return;
+        }
+        if (!playerManager.bothSameCombat(owner.getUniqueId(), attacker.getUniqueId())) {
             event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Pet-Different-Mode").replace("[playerName]", tamed.getOwner().getName())));
-        } else if (main.oldCombat.contains(owner) && !main.oldCombat.contains(attacker)) {
-            event.setCancelled(true);
-            attacker.sendMessage(main.useColors(prefix+main.getConfig().getString("Pet-Different-Mode").replace("[playerName]", tamed.getOwner().getName())));
+            attacker.sendMessage(Util.useColors(prefix+ config.getString("Pet-Different-Mode").replace("[playerName]", tamed.getOwner().getName())));
         }
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player p = event.getPlayer();
-        Main main = JavaPlugin.getPlugin(Main.class);
-        double attackspeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getBaseValue();
-        Object[] forceold = main.getConfig().getStringList("Force-Old").toArray();
-        for (Object value : forceold) {
-            if (value.equals(p.getWorld().getName())) {
-                p.sendMessage(main.useColors(main.getConfig().getString("Forced-Old")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
-                return;
-            }
+        if (worldManager.forceOldWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-Old")));
+            Util.setOldCombat(p);
+            return;
         }
-        Object[] forcenew = main.getConfig().getStringList("Force-New").toArray();
-        for (Object o : forcenew) {
-            if (o.equals(p.getWorld().getName())) {
-                p.sendMessage(main.useColors(main.getConfig().getString("Forced-New")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4);
-                return;
-            }
-        }
-        if (main.oldCombat.contains(p) && attackspeed != 24) {
-            p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
-        } else {
-            double defaultspeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getDefaultValue();
-            p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(defaultspeed);
+
+        if (worldManager.forceNewWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-New")));
+            Util.setNewCombat(p);
         }
     }
 
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
         Player p = event.getPlayer();
-        Main main = JavaPlugin.getPlugin(Main.class);
-        double attackspeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getBaseValue();
-        Object[] forceold = main.getConfig().getStringList("Force-Old").toArray();
-        for (Object value : forceold) {
-            if (value.equals(p.getWorld().getName())) {
-                p.sendMessage(main.useColors(main.getConfig().getString("Forced-Old")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
-                return;
-            }
+        if (worldManager.forceOldWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-Old")));
+            Util.setOldCombat(p);
+            return;
         }
-        Object[] forcenew = main.getConfig().getStringList("Force-New").toArray();
-        for (Object o : forcenew) {
-            if (o.equals(p.getWorld().getName())) {
-                p.sendMessage(main.useColors(main.getConfig().getString("Forced-New")));
-                p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4);
-                return;
-            }
-        }
-        if (main.oldCombat.contains(p) && attackspeed != 24) {
-            p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(24);
-        } else {
-            double defaultspeed = p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getDefaultValue();
-            p.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(defaultspeed);
+
+        if (worldManager.forceNewWorld(p.getWorld())) {
+            p.sendMessage(Util.useColors(config.getString("Forced-New")));
+            Util.setNewCombat(p);
         }
     }
 }

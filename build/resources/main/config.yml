@@ -44,3 +44,6 @@ AlreadyDefaultNew: "&cYour default PvP is Already set to 1.18"
 SpecifyMode: "&cYou need to specify the Combat Mode!"
 
 ReloadMessage: "&aTogglePvP has been Reloaded!"
+
+# Perms
+PERM_ADMIN: "togglepvp.admin"

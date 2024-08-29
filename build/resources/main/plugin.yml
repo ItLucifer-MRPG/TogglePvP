@@ -1,11 +1,11 @@
-main: com.lucifer.togglepvp.plugin.Main
+main: com.lucifer.togglepvp.plugin.TogglePVP
 name: TogglePvP
 version: 1.0
 author: Lucifer
-api-version: 1.18
+api-version: 1.21.1
 
 commands:
   pvp:
     alias: []
-  togglepvp:
+  pvpmode:
     aliases: []

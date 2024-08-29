@@ -1,6 +1,6 @@
 package com.lucifer.togglepvp.plugin.URegions;
 
-import com.lucifer.togglepvp.plugin.Main;
+import com.lucifer.togglepvp.plugin.TogglePVP;
 import me.TechsCode.UltraRegions.UltraRegions;
 import me.TechsCode.UltraRegions.base.item.XMaterial;
 import me.TechsCode.UltraRegions.flags.Flag;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class PvPOnFlag extends Flag implements Listener {
 
-    Main main = JavaPlugin.getPlugin(Main.class);
+    TogglePVP togglePVP = JavaPlugin.getPlugin(TogglePVP.class);
 
     ArrayList<Player> wasDisabled = new ArrayList<>();
 
@@ -69,11 +69,12 @@ public class PvPOnFlag extends Flag implements Listener {
         if (toRegion == null || toRegion.equals(fromResult.getRegion())) {
             return;
         }
-        if (main.enabled.contains(player.getName())) {
+        if (togglePVP.getPlayerManager().isEnabled(player.getUniqueId())) {
             return;
         }
         wasDisabled.add(player);
-        main.enabled.add(player);
+        togglePVP.getPlayerManager().setEnabled(player.getUniqueId());
+
     }
 
     @EventHandler
@@ -94,7 +95,7 @@ public class PvPOnFlag extends Flag implements Listener {
             return;
         }
         wasDisabled.remove(player);
-        main.enabled.remove(player);
+        togglePVP.getPlayerManager().setDisabled(player.getUniqueId());
     }
 
     @EventHandler
@@ -111,11 +112,11 @@ public class PvPOnFlag extends Flag implements Listener {
         if (toRegion == null || toRegion.equals(fromResult.getRegion())) {
             return;
         }
-        if (main.enabled.contains(player.getName())) {
+        if (togglePVP.getPlayerManager().isEnabled(player.getUniqueId())) {
             return;
         }
         wasDisabled.add(player);
-        main.enabled.add(player);
+        togglePVP.getPlayerManager().setEnabled(player.getUniqueId());
     }
 
     @EventHandler
@@ -136,14 +137,14 @@ public class PvPOnFlag extends Flag implements Listener {
             return;
         }
         wasDisabled.remove(player);
-        main.enabled.remove(player);
+        togglePVP.getPlayerManager().setDisabled(player.getUniqueId());
     }
 
     @EventHandler
-    public void onCommand(PlayerCommandPreprocessEvent event){
+    public void onCommand(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
         Location loc = p.getLocation();
-        Result r = calculate(loc,p);
+        Result r = calculate(loc, p);
         if (!r.isPresent() || r.isSetToAllowed()) {
             return;
         }
